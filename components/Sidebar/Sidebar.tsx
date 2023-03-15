@@ -18,7 +18,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Menu */}
-      <div className="left-0 h-full w-[48px] whitespace-normal bg-bg-dark" >
+      <div className="left-0 h-full w-[48px] flex-shrink-0 whitespace-normal bg-bg-dark" >
         <ul>
           {session ?
             <li onClick={() => handleChange(0)} className={`w-12 h-12 flex justify-center items-center cursor-pointer group${mode === 0 ? " border-l-text-light border-l-2" : ""}`}>
@@ -41,9 +41,9 @@ export default function Sidebar() {
         </ul>
       </div >
       {/* Sidebar */}
-      <div className="left-12 h-full whitespace-nowrap bg-bg-dark overflow-hidden" style={{ width: mode > -1 ? 256 : 0 }}>
+      <div className="left-12 h-full whitespace-nowrap bg-bg-dark overflow-hidden flex-shrink-0" style={{ width: mode > -1 ? 256 : 0 }}>
+        {/* Don't conditionally render to keep folder states. Just hide the explorer. */}
         <div className={mode === 0 ? "block" : "hidden"}>
-          {/* Don't stop rendering to keep folder states. */}
           <Explorer />
         </div>
         {{

@@ -29,7 +29,7 @@ export default function Folder({ folder }: { folder: Folder; }) {
         .select("*")
         .eq("owner_id", user!.id)
         .eq("parent_id", folder.folder_id)
-        .order("created_at");
+        .order("folder_name");
       if (data) setFolders(data);
     };
     const fetchNotes = async () => {
@@ -38,7 +38,7 @@ export default function Folder({ folder }: { folder: Folder; }) {
         .select("*")
         .eq("owner_id", user!.id)
         .eq("parent_id", folder.folder_id)
-        .order("created_at");
+        .order("note_name");
       if (data) setNotes(data);
     };
     fetchFolders();

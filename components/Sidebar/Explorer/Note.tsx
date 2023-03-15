@@ -1,6 +1,10 @@
 "use client";
 
+import { useEditor } from "@/components/EditorProvider";
 import { useNote } from "@/components/NoteProvider";
+import { useSupabase } from "@/components/supabase-provider";
+import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
+import ContextMenu, { ContextMenuPosition } from "./ContextMenu";
 
 export type Note = {
   content: string;
@@ -17,14 +21,73 @@ export type Note = {
  * Note component for sidebar explorer.
  */
 export default function Note({ note }: { note: Note; }) {
+  const { supabase } = useSupabase();
+  const { refresh } = useEditor();
+
   const activeNote = useNote();
+  const [menu, setMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<ContextMenuPosition>({ x: 0, y: 0 });
+
+  const [renaming, setRenaming] = useState(false);
+  const [renamed, setRenamed] = useState(note.note_name);
+
+  const menuRef = useRef<HTMLUListElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Disable default right click and show custom menu.
+  const handleContextMenu = (e: any) => {
+    e.preventDefault();
+    setMenu(true);
+    setMenuPosition({ x: e.pageX, y: e.pageY });
+  };
+
+  // Close menu on mouse down.
+  useEffect(() => {
+    return document.addEventListener("mousedown", (e) => {
+      if (e.target !== inputRef.current && renaming) setRenaming(false);
+      if (e.target === menuRef.current || menuRef.current?.contains(e.target as Element)) return;
+      if (menu) setMenu(false);
+    });
+  });
+
+  // Handle submitting
+  const handleSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!renaming) return;
+    if (e.key === "Escape") return setRenaming(false);
+    if (e.key === "Enter") {
+      await supabase
+        .from("notes_v2")
+        .update({ note_name: renamed })
+        .eq("note_id", note.note_id);
+      setRenaming(false);
+      note.note_name = renamed;
+      refresh();
+    }
+  };
 
   return (
-    <div onClick={() => activeNote.setNote(note)} className={`-ml-2 pl-2 flex flex-shrink-0 items-center cursor-pointer pr-4 hover:text-text-xlight${activeNote.note?.note_id === note.note_id ? " bg-white/5 bg-cover" : ""}`}>
-      <svg className="w-4 h-4 flex-shrink-0 ml-[18px] mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-      <p className="h-6 leading-6">{note.note_name}</p>
-    </div>
+    <>
+      <div onContextMenu={handleContextMenu} onClick={() => { if (!renaming) activeNote.setNote(note); }} className={`-ml-2 pl-2 flex flex-shrink-0 items-center cursor-pointer pr-4 hover:text-text-xlight${activeNote.note?.note_id === note.note_id ? " bg-white/5 bg-cover" : ""}${menu ? " text-text-xlight" : ""}`}>
+        <svg className="w-4 h-4 flex-shrink-0 ml-[18px] mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        {!renaming
+          ? <p className="h-6 leading-6">{note.note_name}</p>
+          : <input ref={inputRef} autoFocus onKeyDown={handleSubmit} className="h-6 leading-6 outline-none ring-none border-[1px] border-gray-700 text-text-light bg-bg-default px-2" value={renamed} onChange={(e) => setRenamed(e.target.value)}></input>
+        }
+      </div>
+      {menu && <ContextMenu menuRef={menuRef} position={menuPosition} onClose={() => setMenu(false)} fields={[
+        {
+          name: "Rename",
+          method: () => {
+            setRenaming(true);
+            setRenamed(note.note_name);
+          }
+        },
+        { name: "Move", method: () => null },
+        { name: "Duplicate", method: () => null },
+        { name: "Delete", method: () => null }
+      ]} />}
+    </>
   );
 }

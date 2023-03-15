@@ -11,7 +11,8 @@ module.exports = {
           xlight: "#e8cc9e",
           light: "#c7ac80",
           medium: "#a1927d",
-          dark: "#7a7a7a"
+          dark: "#7a7a7a",
+          xdark: "#232323"
         },
         bg: {
           default: "#252628",

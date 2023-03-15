@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
+import EditorProvider from "../EditorProvider";
 import { useNote } from "../NoteProvider";
 import { useSupabase } from "../supabase-provider";
 import Folder, { Folder as FolderType } from "./Explorer/Folder";
@@ -18,7 +19,7 @@ export default function Explorer() {
       .select("*")
       .eq("owner_id", user!.id)
       .is("parent_id", null)
-      .order("created_at");
+      .order("folder_name");
     if (f) setFolders(f as FolderType[]);
 
     // Notes
@@ -27,7 +28,7 @@ export default function Explorer() {
       .select("*")
       .eq("owner_id", user!.id)
       .is("parent_id", null)
-      .order("created_at");
+      .order("note_name");
     if (n) setNotes(n as NoteType[]);
   }, [supabase, user]);
 
@@ -84,8 +85,10 @@ export default function Explorer() {
         </div>
       </div>
       {/* Items */}
-      {folders.map(folder => <Folder key={folder.folder_id} folder={folder} />)}
-      {notes.map(note => <Note key={note.note_id} note={note} />)}
+      <EditorProvider refresh={refresh}>
+        {folders.map(folder => <Folder key={folder.folder_id} folder={folder} />)}
+        {notes.map(note => <Note key={note.note_id} note={note} />)}
+      </EditorProvider>
     </div>
   );
 }
