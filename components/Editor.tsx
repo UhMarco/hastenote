@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
@@ -16,40 +16,35 @@ import { useDebouncedCallback } from "use-debounce";
 export default function Editor({ content: c, slug: s, readOnly }: { content?: string, slug?: string, readOnly?: boolean; }) {
   const { supabase, user } = useSupabase();
 
-  const [content, setContent] = useState(c);
+  const content = useRef(c);
   const [slug, setSlug] = useState<string>();
 
   // Save new note content.
-  const saveChanges = async (newContent: string) => {
+  const saveChanges = useCallback(async (newContent: string) => {
     // Don't save anonymous notes.
     if (!user) return;
     await supabase.from("notes_v2").update({ content: newContent }).eq("slug", slug);
-    console.log("Updated: ", slug);
-  };
-
-  // Ensure data is not lost if a note is closed within 1.5 seconds of a change being made.
-  // const saveChangesOnNoteClose = useCallback(async (slug: string) => {
-  //   await supabase.from("notes_v2").update({ content }).eq("slug", slug);
-  //   console.log("Updated on close: ", slug);
-  // }, [content, supabase]);
+    console.log("Saved:", slug);
+  }, [slug, supabase, user]);
 
   // Change content when note is changed.
   // A better way of doing this would be to cycle between editor states. Implement at end of project if time allows.
   // See https://discuss.codemirror.net/t/swapdoc-v6-equivalent/5973
   useEffect(() => {
-    // Save previous note changes using previous slug.
-    // if (user && slug) saveChangesOnNoteClose(slug);
+    // Save previous note before switching out in case there wasn't time to automatically save.
+    if (c !== content.current) saveChanges(content.current!);
+
+    // Set new slug and content.
     setSlug(s);
-    // Set new content.
-    setContent(c);
-  }, [c, s, user, slug]);
+    content.current = c;
+  }, [c, s, saveChanges]);
 
   // Save after 1.5 seconds of inactivity.
   const debounced = useDebouncedCallback(value => saveChanges(value), 1500);
 
   // Update stored content state when editor content is changed.
   const onChange = useCallback((value: any) => {
-    setContent(value);
+    content.current = value;
     debounced(value);
   }, [debounced]);
 
@@ -61,7 +56,7 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
           <CodeMirror
             autoFocus
             className="cm-outer-container pr-10 pb-10"
-            value={content}
+            value={content.current}
             extensions={[
               markdown({ base: markdownLanguage, codeLanguages: languages, addKeymap: true }),
               EditorView.lineWrapping,

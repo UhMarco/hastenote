@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useSupabase } from "../supabase-provider";
 import Account from "./Account";
-import Explorer from "./Explorer";
+import Explorer from "./Explorer/Explorer";
 import Upload from "./Upload";
 
 export default function Sidebar() {
-  const { session } = useSupabase();
+  const { user } = useSupabase();
   const [mode, setMode] = useState<number>(-1);
 
   const handleChange = (m: number) => {
@@ -20,7 +20,7 @@ export default function Sidebar() {
       {/* Menu */}
       <div className="left-0 h-full w-[48px] flex-shrink-0 whitespace-normal bg-bg-dark" >
         <ul>
-          {session ?
+          {user ?
             <li onClick={() => handleChange(0)} className={`w-12 h-12 flex justify-center items-center cursor-pointer group${mode === 0 ? " border-l-text-light border-l-2" : ""}`}>
               <svg className={`w-5 h-5 ${mode === 0 ? "stroke-text-light" : "stroke-text-medium group-hover:stroke-text-light"}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -43,9 +43,9 @@ export default function Sidebar() {
       {/* Sidebar */}
       <div className="left-12 h-full whitespace-nowrap bg-bg-dark overflow-hidden flex-shrink-0" style={{ width: mode > -1 ? 256 : 0 }}>
         {/* Don't conditionally render to keep folder states. Just hide the explorer. */}
-        <div className={mode === 0 ? "block" : "hidden"}>
+        {user && <div className={mode === 0 ? "block h-full" : "hidden"}>
           <Explorer />
-        </div>
+        </div>}
         {{
           1: <Upload />,
           2: <Account />

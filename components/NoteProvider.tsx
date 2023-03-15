@@ -27,17 +27,17 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
   const { supabase } = useSupabase();
 
   // Set the note state
-  const setNote = async (note: Note): Promise<Note> => {
+  const setNote = async (newNote: Note): Promise<Note> => {
     // Check for content updates since last render.
-    const { data: updatedNote } = await supabase
+    let { data: updatedNote } = await supabase
       .from("notes_v2")
       .select("*")
-      .eq("note_id", note.note_id)
+      .eq("note_id", newNote.note_id)
       .single();
-    const newNote: Note = updatedNote as Note || note;
-    setNoteState(newNote);
+    updatedNote = updatedNote || newNote;
+    setNoteState(updatedNote as Note);
     // Return the new data just in case the location this method has been called from is using outdata info.
-    return newNote;
+    return updatedNote as Note;
   };
 
   // Create a new empty note.

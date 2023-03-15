@@ -1,9 +1,9 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import EditorProvider from "../EditorProvider";
-import { useNote } from "../NoteProvider";
-import { useSupabase } from "../supabase-provider";
-import Folder, { Folder as FolderType } from "./Explorer/Folder";
-import Note, { Note as NoteType } from "./Explorer/Note";
+import ExplorerProvider from "../../ExplorerProvider";
+import { useNote } from "../../NoteProvider";
+import { useSupabase } from "../../supabase-provider";
+import Folder, { Folder as FolderType } from "./Folder";
+import Note, { Note as NoteType } from "./Note";
 
 export default function Explorer() {
   const { user, supabase } = useSupabase();
@@ -69,7 +69,7 @@ export default function Explorer() {
   return (
     <div className="flex flex-col pt-4 pl-1 pr-3 text-xs select-none h-full overflow-auto text-text-medium stroke-text-light group">
       <div className="flex box-border items-center pl-2 mb-2 h-6 overflow-hidden">
-        <h1 onClick={refresh} className="text-text-light overflow-hidden overflow-ellipsis hover:bg-gray-700/50 rounded-md p-1 cursor-pointer">{user!.username}{"'"}s notes</h1>
+        <h1 onClick={refresh} className="text-text-light overflow-hidden overflow-ellipsis hover:bg-gray-700/50 rounded-md p-1 cursor-pointer">{user?.username}{"'"}s notes</h1>
 
         <div className="group-hover:flex hidden ml-auto flex-initial">
           <div onClick={newNote} className="cursor-pointer hover:bg-gray-700/50 rounded-md p-1">
@@ -85,10 +85,10 @@ export default function Explorer() {
         </div>
       </div>
       {/* Items */}
-      <EditorProvider refresh={refresh}>
+      <ExplorerProvider refresh={refresh}>
         {folders.map(folder => <Folder key={folder.folder_id} folder={folder} />)}
         {notes.map(note => <Note key={note.note_id} note={note} />)}
-      </EditorProvider>
+      </ExplorerProvider>
     </div>
   );
 }
