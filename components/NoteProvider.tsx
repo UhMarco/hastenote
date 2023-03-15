@@ -10,7 +10,7 @@ type MaybeNote = Note | undefined;
 type NoteContext = {
   note: MaybeNote,
   setNote: (note: Note) => Promise<Note>,
-  newNote: (user?: HastenoteUser) => Promise<Note>,
+  newNote: (user?: HastenoteUser, set?: boolean) => Promise<Note>,
   newSlug: () => Promise<string>,
   clear: () => void;
 };
@@ -29,7 +29,11 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
   // Set the note state
   const setNote = async (note: Note): Promise<Note> => {
     // Check for content updates since last render.
-    const { data: updatedNote } = await supabase.from("notes_v2").select("*").eq("note_id", note.note_id).single();
+    const { data: updatedNote } = await supabase
+      .from("notes_v2")
+      .select("*")
+      .eq("note_id", note.note_id)
+      .single();
     const newNote: Note = updatedNote as Note || note;
     setNoteState(newNote);
     // Return the new data just in case the location this method has been called from is using outdata info.
@@ -37,18 +41,18 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
   };
 
   // Create a new empty note.
-  const newNote = async (user?: HastenoteUser): Promise<Note> => {
+  const newNote = async (user?: HastenoteUser, set: boolean = true): Promise<Note> => {
     const newNote = {
       content: "",
-      created_at: null, // This will be written by backend when uploaded.
-      note_id: "", // Same ^
+      created_at: undefined, // This will be written by backend when uploaded.
+      note_id: undefined, // Same ^
       note_name: "Unnamed Note",
       owner_id: user?.id || null,
       parent_id: null,
       private: !!user,
       slug: await newSlug()
     };
-    setNoteState(newNote);
+    if (set) setNoteState(newNote);
     return newNote;
   };
 
@@ -57,7 +61,10 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
     let slug;
     while (true) {
       slug = generate(10);
-      const { data } = await supabase.from("notes").select("slug").eq("slug", slug);
+      const { data } = await supabase
+        .from("notes_v2")
+        .select("slug")
+        .eq("slug", slug);
       if (!data!.length) break;
     }
     return slug;
@@ -73,6 +80,7 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
   );
 }
 
+// Function returning access to context.
 export const useNote = () => {
   const context = useContext(Context);
   if (context === undefined) {

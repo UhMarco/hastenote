@@ -11,6 +11,9 @@ export type Folder = {
   parent_id: string | null;
 };
 
+/**
+ * Folder component for sidebar explorer.
+ */
 export default function Folder({ folder }: { folder: Folder; }) {
   const { supabase, user } = useSupabase();
 
@@ -21,16 +24,26 @@ export default function Folder({ folder }: { folder: Folder; }) {
 
   useEffect(() => {
     const fetchFolders = async () => {
-      const { data } = await supabase.from("folders").select("*").eq("owner_id", user?.id).eq("parent_id", folder.folder_id);
+      const { data } = await supabase
+        .from("folders")
+        .select("*")
+        .eq("owner_id", user!.id)
+        .eq("parent_id", folder.folder_id)
+        .order("created_at");
       if (data) setFolders(data);
     };
     const fetchNotes = async () => {
-      const { data } = await supabase.from("notes_v2").select("*").eq("owner_id", user?.id).eq("parent_id", folder.folder_id);
+      const { data } = await supabase
+        .from("notes_v2")
+        .select("*")
+        .eq("owner_id", user!.id)
+        .eq("parent_id", folder.folder_id)
+        .order("created_at");
       if (data) setNotes(data);
     };
     fetchFolders();
     fetchNotes();
-  }, [folder, supabase, user?.id]);
+  }, [folder, supabase, user]);
 
   return (
     <>

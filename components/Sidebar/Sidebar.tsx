@@ -1,37 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSupabase } from "../supabase-provider";
 import Account from "./Account";
 import Explorer from "./Explorer";
-import { Folder } from "./Explorer/Folder";
-import { Note } from "./Explorer/Note";
 import Upload from "./Upload";
 
 export default function Sidebar() {
-  const { supabase, user, session } = useSupabase();
+  const { session } = useSupabase();
   const [mode, setMode] = useState<number>(-1);
 
   const handleChange = (m: number) => {
     if (mode != m) setMode(m);
     else setMode(-1);
   };
-
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
-
-  useEffect(() => {
-    const fetchFolders = async () => {
-      const { data } = await supabase.from("folders").select("*").eq("owner_id", user?.id).is("parent_id", null);
-      if (data) setFolders(data as Folder[]);
-    };
-    const fetchNotes = async () => {
-      const { data } = await supabase.from("notes_v2").select("*").eq("owner_id", user?.id).is("parent_id", null);
-      if (data) setNotes(data as Note[]);
-    };
-    fetchFolders();
-    fetchNotes();
-  }, [supabase, user?.id]);
 
   return (
     <>
@@ -61,8 +43,8 @@ export default function Sidebar() {
       {/* Sidebar */}
       <div className="left-12 h-full whitespace-nowrap bg-bg-dark overflow-hidden" style={{ width: mode > -1 ? 256 : 0 }}>
         <div className={mode === 0 ? "block" : "hidden"}>
-          {/* Don't stop rendering to keep folder open states. */}
-          <Explorer folders={folders} notes={notes} />
+          {/* Don't stop rendering to keep folder states. */}
+          <Explorer />
         </div>
         {{
           1: <Upload />,

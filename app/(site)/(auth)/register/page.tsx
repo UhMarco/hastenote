@@ -20,7 +20,11 @@ export default function Register() {
 
     setLoading(true);
 
-    const { data } = await supabase.from("profiles").select("username").eq("username", event.target.username.value).single();
+    const { data } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("username", event.target.username.value)
+      .single();
 
     if (data) {
       setLoading(false);

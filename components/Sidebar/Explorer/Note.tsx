@@ -4,8 +4,8 @@ import { useNote } from "@/components/NoteProvider";
 
 export type Note = {
   content: string;
-  created_at: string | null;
-  note_id: string;
+  created_at?: string;
+  note_id?: string;
   note_name: string;
   owner_id: string | null;
   parent_id: string | null;
@@ -13,6 +13,9 @@ export type Note = {
   slug: string;
 };
 
+/**
+ * Note component for sidebar explorer.
+ */
 export default function Note({ note }: { note: Note; }) {
   const activeNote = useNote();
 

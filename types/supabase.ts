@@ -9,20 +9,6 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      bookmarks: {
-        Row: {
-          id: string
-          slug: string | null
-        }
-        Insert: {
-          id: string
-          slug?: string | null
-        }
-        Update: {
-          id?: string
-          slug?: string | null
-        }
-      }
       folders: {
         Row: {
           folder_id: string
@@ -66,7 +52,7 @@ export interface Database {
       notes_v2: {
         Row: {
           content: string
-          created_at: string | null
+          created_at: string
           note_id: string
           note_name: string
           owner_id: string | null
@@ -76,7 +62,7 @@ export interface Database {
         }
         Insert: {
           content: string
-          created_at?: string | null
+          created_at?: string
           note_id?: string
           note_name?: string
           owner_id?: string | null
@@ -86,7 +72,7 @@ export interface Database {
         }
         Update: {
           content?: string
-          created_at?: string | null
+          created_at?: string
           note_id?: string
           note_name?: string
           owner_id?: string | null
