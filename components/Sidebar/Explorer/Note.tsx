@@ -4,7 +4,7 @@ import { useExplorer } from "@/components/ExplorerProvider";
 import { useNote } from "@/components/NoteProvider";
 import { useSupabase } from "@/components/supabase-provider";
 import { useEffect, useRef, useState } from "react";
-import ContextMenu, { ContextMenuPosition } from "./ContextMenu";
+import ContextMenu, { ContextMenuField, ContextMenuPosition } from "./ContextMenu";
 
 export type Note = {
   content: string;
@@ -22,7 +22,7 @@ export type Note = {
  */
 export default function Note({ note }: { note: Note; }) {
   const { supabase } = useSupabase();
-  const { refresh } = useExplorer();
+  const explorer = useExplorer();
 
   const activeNote = useNote();
   const [menu, setMenu] = useState(false);
@@ -70,21 +70,13 @@ export default function Note({ note }: { note: Note; }) {
         .eq("note_id", note.note_id);
       setRenaming(false);
       note.note_name = renamed;
-      refresh();
+      explorer.refresh();
     }
-  };
-
-  // Moving notes
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("Drag End");
-    console.log(document.elementFromPoint(e.pageX, e.pageY));
   };
 
   return (
     <>
       <div
-        draggable={!renaming}
-        onDragEnd={handleDrop}
         onContextMenu={handleContextMenu}
         onClick={() => { if (!renaming) activeNote.setNote(note); }}
         className={`-ml-2 pl-2 cursor-pointer flex flex-shrink-0 items-center pr-4 hover:text-text-xlight${activeNote.note?.note_id === note.note_id ? " bg-white/5 bg-cover" : ""}${menu ? " text-text-xlight" : ""}`}
@@ -97,35 +89,59 @@ export default function Note({ note }: { note: Note; }) {
           : <input ref={inputRef} autoFocus onKeyDown={handleSubmit} className="h-6 leading-6 outline-none ring-none border-[1px] border-gray-700 text-text-light bg-bg-default px-2" value={renamed} onChange={(e) => setRenamed(e.target.value)}></input>
         }
       </div>
-      {menu && <ContextMenu menuRef={menuRef} position={menuPosition} onClose={() => setMenu(false)} fields={[
-        {
-          name: "Rename",
-          method: () => {
-            setRenaming(true);
-            setRenamed(note.note_name);
-          }
-        },
-        {
-          name: "Duplicate", method: async () => {
-            const clone = { ...note };
-            delete clone.note_id, clone.created_at;
-            clone.note_name = clone.note_name + " Copy";
-            await supabase
-              .from("notes_v2")
-              .insert(clone);
-            refresh();
-          }
-        },
-        {
-          name: "Delete", method: async () => {
-            await supabase
-              .from("notes_v2")
-              .delete()
-              .eq("note_id", note.note_id);
-            refresh();
-          }
+      {menu && <ContextMenu menuRef={menuRef} position={menuPosition} onClose={() => setMenu(false)} fields={[{
+        name: "Rename",
+        method: () => {
+          setRenaming(true);
+          setRenamed(note.note_name);
         }
-      ]} />}
+      },
+      ...(explorer.folders ? [{
+        name: "Move",
+        subitems: [...(note.parent_id ? [{
+          name: "Root",
+          method: async () => {
+            await supabase
+              .from("notes_v2")
+              .update({ parent_id: null })
+              .eq("note_id", note.note_id);
+            explorer.refresh();
+          }
+        }] : []),
+        ...explorer.folders.filter(folder => folder.folder_id !== note.parent_id).map<ContextMenuField>((folder) => {
+          return {
+            name: folder.folder_name,
+            method: async () => {
+              await supabase
+                .from("notes_v2")
+                .update({ parent_id: folder.folder_id })
+                .eq("note_id", note.note_id);
+              explorer.refresh();
+            }
+          };
+        })],
+        method: () => null
+      }] : []),
+      {
+        name: "Duplicate", method: async () => {
+          const clone = { ...note };
+          delete clone.note_id, clone.created_at;
+          clone.note_name = clone.note_name + " Copy";
+          await supabase
+            .from("notes_v2")
+            .insert(clone);
+          explorer.refresh();
+        }
+      },
+      {
+        name: "Delete", method: async () => {
+          await supabase
+            .from("notes_v2")
+            .delete()
+            .eq("note_id", note.note_id);
+          explorer.refresh();
+        }
+      }]} />}
     </>
   );
 }

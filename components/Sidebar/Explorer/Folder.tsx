@@ -1,6 +1,6 @@
 "use client";
 
-import { useSupabase } from "@/components/supabase-provider";
+import { useExplorer } from "@/components/ExplorerProvider";
 import { useEffect, useState } from "react";
 import Note from "./Note";
 
@@ -15,7 +15,7 @@ export type Folder = {
  * Folder component for sidebar explorer.
  */
 export default function Folder({ folder }: { folder: Folder; }) {
-  const { supabase, user } = useSupabase();
+  const explorer = useExplorer();
 
   const [open, setOpen] = useState(false);
 
@@ -23,27 +23,12 @@ export default function Folder({ folder }: { folder: Folder; }) {
   const [notes, setNotes] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchFolders = async () => {
-      const { data } = await supabase
-        .from("folders")
-        .select("*")
-        .eq("owner_id", user!.id)
-        .eq("parent_id", folder.folder_id)
-        .order("folder_name");
-      if (data) setFolders(data);
+    const update = async () => {
+      setFolders(await explorer.foldersAt(folder.folder_id));
+      setNotes(await explorer.notesAt(folder.folder_id));
     };
-    const fetchNotes = async () => {
-      const { data } = await supabase
-        .from("notes_v2")
-        .select("*")
-        .eq("owner_id", user!.id)
-        .eq("parent_id", folder.folder_id)
-        .order("note_name");
-      if (data) setNotes(data);
-    };
-    fetchFolders();
-    fetchNotes();
-  }, [folder, supabase, user]);
+    update();
+  }, [explorer, folder.folder_id]);
 
   return (
     <>
