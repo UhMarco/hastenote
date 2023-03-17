@@ -154,21 +154,21 @@ export default function Folder({ folder }: { folder: Folder; }) {
       }] : []),
       {
         name: "Delete", method: async () => {
+          // Move stored notes.
+          await supabase
+            .from("notes_v2")
+            .update({ parent_id: folder.parent_id })
+            .eq("parent_id", folder.folder_id);
+          // Move stored folders
+          await supabase
+            .from("folders")
+            .update({ parent_id: folder.parent_id })
+            .eq("parent_id", folder.folder_id);
           // Delete folder
           await supabase
             .from("folders")
             .delete()
             .eq("folder_id", folder.folder_id);
-          // Move sub folders to parent or root
-          await supabase
-            .from("folders")
-            .update({ parent_id: folder.parent_id })
-            .eq("parent_id", folder.folder_id);
-          // Move notes.
-          await supabase
-            .from("notes_v2")
-            .update({ parent_id: folder.parent_id })
-            .eq("parent_id", folder.folder_id);
           explorer.refresh();
         }
       }]} />}
