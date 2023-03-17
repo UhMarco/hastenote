@@ -98,7 +98,7 @@ export default function Note({ note }: { note: Note; }) {
           setRenamed(note.note_name);
         }
       },
-      ...(explorer.folders ? [{
+      ...(explorer.folders.length ? [{
         name: "Move",
         subitems: [...(note.parent_id ? [{
           name: "Root",
