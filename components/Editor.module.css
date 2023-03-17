@@ -6,7 +6,6 @@
   line-height: 1.5;
   display: block;
   overflow-y: auto;
-  width: max-content;
   color: var(--color-fg-default);
   white-space: break-spaces;
   word-break: break-word;
