@@ -25,6 +25,8 @@ export default function Note({ note }: { note: Note; }) {
   const explorer = useExplorer();
 
   const activeNote = useNote();
+
+  // Right click related states.
   const [menu, setMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState<ContextMenuPosition>({ x: 0, y: 0 });
 
@@ -59,7 +61,7 @@ export default function Note({ note }: { note: Note; }) {
     };
   });
 
-  // Handle submitting
+  // Handle submitting new name.
   const handleSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!renaming) return;
     if (e.key === "Escape") return setRenaming(false);

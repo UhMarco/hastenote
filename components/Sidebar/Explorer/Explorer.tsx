@@ -33,8 +33,8 @@ export default function Explorer() {
         </div>
       </div>
       {/* Items */}
-      {explorer.rootFolders.map(folder => <Folder key={folder.folder_id} folder={folder} />)}
-      {explorer.notes.map(note => <Note key={note.note_id} note={note} />)}
+      {explorer.folders.filter(e => e.parent_id === null).map(folder => <Folder key={folder.folder_id} folder={folder} />)}
+      {explorer.notes.filter(e => e.parent_id === null).map(note => <Note key={note.note_id} note={note} />)}
     </div>
   );
 }
