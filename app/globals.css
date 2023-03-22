@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-border-default: #444c56;
+  --color-border-muted: #373E47;
+  --color-link: #e8cc9e;
+  --color-neutral-muted: #6e768166;
+  --color-fg-default: #a1927d;
+  --color-fg-muted: #768390;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;

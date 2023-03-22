@@ -3,19 +3,9 @@
 import Editor from "@/components/Editor";
 import Logo from "@/public/logo.svg";
 import { useNote } from "@/components/NoteProvider";
-import { useSupabase } from "@/components/supabase-provider";
-import { useEffect } from "react";
 
 export default function Notes() {
   const activeNote = useNote();
-  const { user } = useSupabase();
-
-  // If anonymous, create a new note to display.
-  useEffect(() => {
-    if (!user) {
-      activeNote.newNote();
-    }
-  }, [user, activeNote]);
 
   return (
     <>
