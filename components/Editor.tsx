@@ -65,7 +65,7 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
   return (
     <div className={`group w-full h-full grid${mode === 2 ? " grid-cols-2" : ""}`}>
       {/* Editor */}
-      <div className="playground-container">
+      <div className={mode === 1 ? "hidden" : "playground-container"}>
         <div className="playground-panel">
           <CodeMirror
             autoFocus
