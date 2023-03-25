@@ -2,8 +2,8 @@
 
 import { useExplorer } from "@/components/ExplorerProvider";
 import { useNote } from "@/components/NoteProvider";
-import { useSupabase } from "@/components/supabase-provider";
-import { useEffect, useRef, useState } from "react";
+import { useSupabase } from "@/components/supabaseProvider";
+import { RefObject, useEffect, useRef, useState } from "react";
 import ContextMenu, { ContextMenuField, ContextMenuPosition } from "./ContextMenu";
 
 export type Note = {
@@ -36,6 +36,10 @@ export default function Note({ note }: { note: Note; }) {
   const menuRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [notificationMessage, setNotificationMessage] = useState<string | undefined>();
+
+  const notificationRef = useRef<HTMLDivElement>(null);
+
   // Disable default right click and show custom menu.
   const handleContextMenu = (e: any) => {
     e.preventDefault();
@@ -46,6 +50,7 @@ export default function Note({ note }: { note: Note; }) {
   // Close menu on mouse down.
   useEffect(() => {
     const mouseDownHandler = (e: MouseEvent) => {
+      if (notificationMessage && !notificationRef.current?.contains(e.target as Element)) setNotificationMessage(undefined);
       if (e.target !== inputRef.current && renaming) setRenaming(false);
       if (e.target === menuRef.current || menuRef.current?.contains(e.target as Element)) return;
       if (menu) setMenu(false);
@@ -91,6 +96,7 @@ export default function Note({ note }: { note: Note; }) {
           : <input ref={inputRef} autoFocus onKeyDown={handleSubmit} className="h-6 leading-6 outline-none ring-none border-[1px] border-gray-700 text-text-light bg-bg-default px-2" value={renamed} onChange={(e) => setRenamed(e.target.value)}></input>
         }
       </div>
+      <Notification notificationRef={notificationRef} visible={notificationMessage != undefined} onClose={() => setNotificationMessage(undefined)} message={notificationMessage!} />
       {menu && <ContextMenu menuRef={menuRef} position={menuPosition} onClose={() => setMenu(false)} fields={[{
         name: "Rename",
         method: () => {
@@ -143,7 +149,72 @@ export default function Note({ note }: { note: Note; }) {
             .eq("note_id", note.note_id);
           explorer.refresh();
         }
-      }]} />}
+      },
+      ...(note.private ? [{
+        name: "Share",
+        method: async () => {
+          await supabase
+            .from("notes_v2")
+            .update({ private: false })
+            .eq("note_id", note.note_id);
+          note.private = false;
+          navigator.clipboard.writeText(`https://hastenote.com/${note.slug}`);
+          setNotificationMessage("Link copied to clipboard.");
+        }
+      }] : [
+        {
+          name: "Copy Link",
+          method: () => {
+            navigator.clipboard.writeText(`https://hastenote.com/${note.slug}`);
+            setNotificationMessage("Link copied to clipboard.");
+          }
+        },
+        {
+          name: "Make Private",
+          method: async () => {
+            await supabase
+              .from("notes_v2")
+              .update({ private: true })
+              .eq("note_id", note.note_id);
+            note.private = true;
+            setNotificationMessage("Note set to private.");
+          }
+        }])]} />}
     </>
+  );
+}
+
+function Notification({ notificationRef, visible, onClose, message }: { notificationRef: RefObject<HTMLDivElement>, visible: boolean, onClose: () => void, message: string; }) {
+  return (
+    <div ref={notificationRef} className={`transition-opacity duration-300 opacity-${visible ? "100" : "0"}`} style={{ "zIndex": 1 }}>
+      <div
+        aria-live="assertive"
+        className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
+      >
+        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+          <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-bg-dark shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="p-4">
+              <div className="flex items-center">
+                <div className="flex w-0 flex-1 justify-between">
+                  <p className="w-0 flex-1 text-sm font-medium text-text-xlight">{message}</p>
+                </div>
+                <div className="ml-4 flex flex-shrink-0">
+                  <button
+                    type="button"
+                    className="inline-flex rounded-md text-text-xlight hover:text-text-xlight/80 hover:bg-gray-700/50 p-1"
+                    onClick={onClose}
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

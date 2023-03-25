@@ -4,7 +4,7 @@ import { createContext, ReactNode, useCallback, useContext, useState } from "rea
 import { useNote } from "./NoteProvider";
 import { Folder } from "./Sidebar/Explorer/Folder";
 import { Note } from "./Sidebar/Explorer/Note";
-import { useSupabase } from "./supabase-provider";
+import { useSupabase } from "./supabaseProvider";
 
 type ExplorerContext = {
   folders: Folder[],

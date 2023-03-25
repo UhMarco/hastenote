@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSupabase } from "./supabase-provider";
+import { useSupabase } from "./supabaseProvider";
 
 export default function HeroButtons() {
   const { session } = useSupabase();

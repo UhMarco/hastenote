@@ -1,6 +1,6 @@
 import { useExplorer } from "@/components/ExplorerProvider";
 import { useEffect } from "react";
-import { useSupabase } from "../../supabase-provider";
+import { useSupabase } from "../../supabaseProvider";
 import Folder from "./Folder";
 import Note from "./Note";
 

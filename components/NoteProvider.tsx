@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Note } from "./Sidebar/Explorer/Note";
-import { HastenoteUser, useSupabase } from "./supabase-provider";
+import { HastenoteUser, useSupabase } from "./supabaseProvider";
 import { generate } from "randomstring";
+import { usePathname, useRouter } from "next/navigation";
 
 type MaybeNote = Note | undefined;
 
@@ -26,6 +27,9 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
 
   const { supabase } = useSupabase();
 
+  const router = useRouter();
+  const path = usePathname();
+
   // Set the note state
   const setNote = async (newNote: Note): Promise<Note> => {
     // Check for content updates since last render.
@@ -36,6 +40,10 @@ export default function NoteProvider({ children }: { children: ReactNode; }) {
       .single();
     updatedNote = updatedNote || newNote;
     setNoteState(updatedNote as Note);
+
+    // Move back to notes if looking at a public note.
+    if (path !== "/notes") router.push("/notes");
+
     // Return the new data just in case the location this method has been called from is using outdata info.
     return updatedNote as Note;
   };

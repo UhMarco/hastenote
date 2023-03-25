@@ -1,6 +1,6 @@
 "use client";
 
-import { useSupabase } from "@/components/supabase-provider";
+import { useSupabase } from "@/components/supabaseProvider";
 import Logo from "@/public/logo.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

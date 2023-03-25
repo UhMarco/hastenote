@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSupabase } from "../supabase-provider";
+import { useSupabase } from "../supabaseProvider";
 import Account from "./Account";
 import Explorer from "./Explorer/Explorer";
 import Upload from "./Upload";

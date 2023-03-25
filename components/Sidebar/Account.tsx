@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useNote } from "../NoteProvider";
-import { useSupabase } from "../supabase-provider";
+import { useSupabase } from "../supabaseProvider";
 
 export default function Account() {
   const { supabase, session, user } = useSupabase();

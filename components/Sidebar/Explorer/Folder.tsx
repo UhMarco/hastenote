@@ -1,7 +1,7 @@
 "use client";
 
 import { useExplorer } from "@/components/ExplorerProvider";
-import { useSupabase } from "@/components/supabase-provider";
+import { useSupabase } from "@/components/supabaseProvider";
 import { useEffect, useRef, useState } from "react";
 import ContextMenu, { ContextMenuField, ContextMenuPosition } from "./ContextMenu";
 import Note from "./Note";

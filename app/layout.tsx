@@ -1,8 +1,8 @@
 import "server-only";
 
-import SupabaseListener from "../components/supabase-listener";
-import SupabaseProvider, { HastenoteUser } from "../components/supabase-provider";
-import { createClient } from "../utils/supabase-server";
+import SupabaseListener from "../components/supabaseListener";
+import SupabaseProvider, { HastenoteUser } from "../components/supabaseProvider";
+import { createClient } from "../utils/supabaseServer";
 
 import { Metadata } from "next";
 import "./globals.css";

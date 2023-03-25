@@ -8,8 +8,8 @@ import { languages } from "@codemirror/language-data";
 import { EditorView } from "@codemirror/view";
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link";
 
-import theme from "./Theme";
-import { useSupabase } from "./supabase-provider";
+import theme from "../utils/theme";
+import { useSupabase } from "./supabaseProvider";
 
 import { useDebouncedCallback } from "use-debounce";
 
@@ -44,7 +44,7 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
   // See https://discuss.codemirror.net/t/swapdoc-v6-equivalent/5973
   useEffect(() => {
     // Save previous note before switching out in case there wasn't time to automatically save.
-    if (c !== content.current) saveChanges(content.current!);
+    if (c !== content.current && slug != undefined) saveChanges(content.current!);
 
     // Set new slug and content.
     setSlug(s);
@@ -59,8 +59,8 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
   const onChange = useCallback((value: any) => {
     content.current = value;
     setContentState(value);
-    if (user) debounced(value);
-  }, [debounced, user]);
+    if (user && !readOnly) debounced(value);
+  }, [debounced, user, readOnly]);
 
   return (
     <div className={`group w-full h-full grid${mode === 2 ? " grid-cols-2" : ""}`}>
