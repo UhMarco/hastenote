@@ -1,7 +1,7 @@
 "use client";
 
 import Editor from "@/components/Editor";
-import { useNote } from "@/components/NoteProvider";
+import { useEditor } from "@/components/EditorProvider";
 import { createClient } from "@/utils/supabaseBrowser";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export default function SharedNote({ params }: any) {
 
   const router = useRouter();
 
-  const { clear } = useNote();
+  const { clear } = useEditor();
 
   useEffect(() => {
     const getData = async () => {

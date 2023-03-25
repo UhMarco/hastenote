@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
-import { useNote } from "./NoteProvider";
+import { useEditor } from "./EditorProvider";
 import { Folder } from "./Sidebar/Explorer/Folder";
 import { Note } from "./Sidebar/Explorer/Note";
 import { useSupabase } from "./supabaseProvider";
@@ -10,7 +10,7 @@ type ExplorerContext = {
   folders: Folder[],
   notes: Note[],
   refresh: () => void,
-  newNote: () => void,
+  newNote: (set?: boolean) => void,
   newFolder: () => void,
 };
 
@@ -19,12 +19,14 @@ const Context = createContext<ExplorerContext | undefined>(undefined);
 export default function ExplorerProvider({ children }: { children: ReactNode; }) {
   const { supabase, user } = useSupabase();
 
-  const activeNote = useNote();
+  const editor = useEditor();
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
   const refresh = useCallback(async () => {
+    if (!user) return;
+
     // Folders
     const { data: f } = await supabase
       .from("folders")
@@ -42,14 +44,15 @@ export default function ExplorerProvider({ children }: { children: ReactNode; })
     if (n) setNotes(n as Note[]);
   }, [supabase, user]);
 
-  const newNote = async () => {
-    const note = await activeNote.newNote(user!, false);
+  const newNote = async (set: boolean = false) => {
+    const note = await editor.newNote(user || undefined);
     delete note.note_id, note.created_at; // Database will make these for me.
-    await supabase
+    const { data } = await supabase
       .from("notes_v2")
       .insert(note)
       .select()
       .single();
+    if (set) editor.setNote(data! as Note);
     refresh();
   };
 

@@ -6,8 +6,8 @@ import { createClient } from "../utils/supabaseServer";
 
 import { Metadata } from "next";
 import "./globals.css";
-import NoteProvider from "@/components/NoteProvider";
 import ExplorerProvider from "@/components/ExplorerProvider";
+import EditorProvider from "@/components/EditorProvider";
 
 // do not cache this layout
 export const revalidate = 0;
@@ -43,12 +43,12 @@ export default async function RootLayout({
     <html lang="en" className="bg-bg-default h-full">
       <body className="h-full">
         <SupabaseProvider session={session} user={notesUser}>
-          <NoteProvider>
+          <EditorProvider>
             <ExplorerProvider>
               <SupabaseListener serverAccessToken={session?.access_token} />
               {children}
             </ExplorerProvider>
-          </NoteProvider>
+          </EditorProvider>
         </SupabaseProvider>
       </body>
     </html >

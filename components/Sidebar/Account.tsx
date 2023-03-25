@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useNote } from "../NoteProvider";
+import { useEditor } from "../EditorProvider";
 import { useSupabase } from "../supabaseProvider";
 
 export default function Account() {
   const { supabase, session, user } = useSupabase();
-  const note = useNote();
+
+  const editor = useEditor();
 
   return (
     <div className="flex flex-col pt-4 pl-1 pr-3 text-xs select-none h-full overflow-auto text-text-medium">
@@ -19,7 +20,7 @@ export default function Account() {
             <p>You are signed in as {user?.username}</p>
             <button onClick={() => {
               supabase.auth.signOut();
-              note.clear();
+              editor.clear();
             }} className="mt-2 flex items-center justify-center text-text-xlight bg-button-special outline-none rounded-md h-8 font-bold hover:bg-button-special/80">
               Sign out
             </button>
