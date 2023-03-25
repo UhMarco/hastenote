@@ -36,7 +36,6 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
     // Don't save anonymous notes.
     if (!user) return;
     await supabase.from("notes_v2").update({ content: newContent }).eq("slug", slug);
-    console.log("Saved:", slug);
   }, [slug, supabase, user]);
 
   // Change content when note is changed.
