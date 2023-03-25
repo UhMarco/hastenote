@@ -50,7 +50,7 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
     setSlug(s);
     content.current = c;
     setContentState(c);
-  }, [c, s, saveChanges]);
+  }, [c, s, saveChanges, slug]);
 
   // Save after 1.5 seconds of inactivity.
   const debounced = useDebouncedCallback(value => saveChanges(value), 1500);
