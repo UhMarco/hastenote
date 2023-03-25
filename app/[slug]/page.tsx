@@ -15,7 +15,7 @@ async function getNote(slug: string) {
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const note = await getNote(params.slug);
-  return { title: note?.note_name || "Hastentoe", description: note?.content ? ((note.content.length > 40) ? note.content.slice(0, 40 - 1) + "&hellip;" : note.content) : "Create and share notes in markdown." };
+  return { title: note?.note_name || "Hastentoe", description: note?.content ? ((note.content.length > 80) ? note.content.slice(0, 80 - 1) + "&hellip;" : note.content) : "Create and share notes in markdown." };
 }
 
 export default async function NotePage({ params }: any) {
