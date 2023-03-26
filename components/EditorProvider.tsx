@@ -109,6 +109,7 @@ export default function EditorProvider({ children }: { children: ReactNode; }) {
   // Clear content
   const clear = () => {
     setContent("");
+    setPreviousNote(note);
     setNoteState(undefined);
   };
 

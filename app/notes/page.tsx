@@ -1,6 +1,6 @@
 "use client";
 
-import Editor from "@/components/NewEditor";
+import Editor from "@/components/Editor";
 import Logo from "@/public/logo.svg";
 import { useSupabase } from "@/components/supabaseProvider";
 import { useRouter } from "next/navigation";

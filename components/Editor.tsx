@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useEditor } from "./EditorProvider";
 
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { EditorView } from "@codemirror/view";
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link";
-
-import theme from "../utils/theme";
-import { useSupabase } from "./supabaseProvider";
+import theme from "@/utils/theme";
 
 import { useDebouncedCallback } from "use-debounce";
 
@@ -22,44 +22,33 @@ import { coldarkDark as codeTheme } from "react-syntax-highlighter/dist/esm/styl
 
 import styles from "./Editor.module.css";
 
-export default function Editor({ content: c, slug: s, readOnly }: { content?: string, slug?: string, readOnly?: boolean; }) {
-  const { supabase, user } = useSupabase();
+export default function Editor() {
+  const editor = useEditor();
+  const { save, previousNote } = editor;
 
   const [mode, setMode] = useState(0); // 0: Editor, 1: Preview, 2: Splitscreen
 
-  const content = useRef(c);
-  const [contentState, setContentState] = useState(c);
-  const [slug, setSlug] = useState<string>();
+  // Save the previously opened note when the note is switched.
+  const savePreviousChanges = useCallback(() => {
+    if (!previousNote) return;
+    save(previousNote.content, previousNote.note_id);
+  }, [save, previousNote]);
 
-  // Save new note content.
-  const saveChanges = useCallback(async (newContent: string) => {
-    // Don't save anonymous notes.
-    if (!user) return;
-    await supabase.from("notes_v2").update({ content: newContent }).eq("slug", slug);
-  }, [slug, supabase, user]);
-
-  // Change content when note is changed.
-  // A better way of doing this would be to cycle between editor states. Implement at end of project if time allows.
-  // See https://discuss.codemirror.net/t/swapdoc-v6-equivalent/5973
   useEffect(() => {
-    // Save previous note before switching out in case there wasn't time to automatically save.
-    if (c !== content.current && slug != undefined) saveChanges(content.current!);
+    console.log("Note changed");
+    savePreviousChanges();
+  }, [editor.note, savePreviousChanges]);
 
-    // Set new slug and content.
-    setSlug(s);
-    content.current = c;
-    setContentState(c);
-  }, [c, s, saveChanges, slug]);
+  // Debounce automatically saving.
+  // Make sure the note we're trying to save is the currently opened note and the user has not switched since this method was originally called.
+  const debounced = useDebouncedCallback((id: string) => {
+    if (editor.note?.note_id === id) editor.save(editor.content);
+  }, 1500);
 
-  // Save after 1.5 seconds of inactivity.
-  const debounced = useDebouncedCallback(value => saveChanges(value), 1500);
-
-  // Update stored content state when editor content is changed.
-  const onChange = useCallback((value: any) => {
-    content.current = value;
-    setContentState(value);
-    if (user && !readOnly) debounced(value);
-  }, [debounced, user, readOnly]);
+  const handleChange = (value: string) => {
+    editor.updateContent(value);
+    if (editor.note?.note_id) debounced(editor.note?.note_id);
+  };
 
   return (
     <div className={`group w-full h-full grid${mode === 2 ? " grid-cols-2" : ""}`}>
@@ -68,23 +57,21 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
         <div className="playground-panel">
           <CodeMirror
             autoFocus
+            value={editor.content}
             className="cm-outer-container pb-10"
-            value={content.current}
+            theme={theme}
+            onChange={handleChange}
+            spellCheck={false}
             extensions={[
               markdown({ base: markdownLanguage, codeLanguages: languages, addKeymap: true }),
               EditorView.lineWrapping,
               hyperLink
             ]}
-            theme={theme}
-            readOnly={readOnly}
-            spellCheck={false}
-            onChange={readOnly ? () => null : onChange}
             basicSetup={{
               searchKeymap: false,
               closeBrackets: true,
               autocompletion: false
-            }}
-          />
+            }} />
         </div>
       </div>
       {/* Preview */}
@@ -112,7 +99,7 @@ export default function Editor({ content: c, slug: s, readOnly }: { content?: st
               }
             }}
           >
-            {contentState || ""}
+            {editor.content || ""}
           </ReactMarkdown>
         </div>
       }
