@@ -149,6 +149,7 @@ export default function Note({ note }: { note: Note; }) {
             .from("notes_v2")
             .delete()
             .eq("note_id", note.note_id);
+          if (editor.note?.note_id === note.note_id) editor.clear();
           explorer.refresh();
         }
       },
