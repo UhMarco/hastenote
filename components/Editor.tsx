@@ -22,7 +22,7 @@ import { coldarkDark as codeTheme } from "react-syntax-highlighter/dist/esm/styl
 
 import styles from "./Editor.module.css";
 
-export default function Editor() {
+export default function Editor({ readOnly }: { readOnly?: boolean; }) {
   const editor = useEditor();
   const { save, previousNote } = editor;
 
@@ -57,6 +57,7 @@ export default function Editor() {
         <div className="playground-panel">
           <CodeMirror
             autoFocus
+            readOnly={readOnly}
             value={editor.content}
             className="cm-outer-container pb-10"
             theme={theme}

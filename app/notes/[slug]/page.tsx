@@ -4,7 +4,7 @@ import Editor from "@/components/Editor";
 import { useEditor } from "@/components/EditorProvider";
 import { createClient } from "@/utils/supabaseBrowser";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 async function getContent(slug: string) {
   const supabase = createClient();
@@ -18,24 +18,24 @@ async function getContent(slug: string) {
 }
 
 export default function SharedNote({ params }: any) {
-  const [content, setContent] = useState<string>();
 
   const router = useRouter();
 
-  const { clear } = useEditor();
+  const { clear, updateContent } = useEditor();
 
   useEffect(() => {
     const getData = async () => {
       const found = await getContent(params.slug);
       if (!found) router.push("/notes");
-      setContent(found);
+      console.log("checing");
       clear();
+      updateContent(found);
     };
     getData();
-  }, [clear, params.slug, router]);
+  }, [clear, updateContent, params.slug, router]);
 
 
   return (
-    <Editor readOnly content={content} />
+    <Editor readOnly />
   );
 }
