@@ -30,7 +30,7 @@ export default function Editor({ readOnly }: { readOnly?: boolean; }) {
 
   // Save the previously opened note when the note is switched.
   const savePreviousChanges = useCallback(() => {
-    if (!previousNote) return;
+    if (!previousNote?.note_id) return;
     save(previousNote.content, previousNote.note_id);
   }, [save, previousNote]);
 

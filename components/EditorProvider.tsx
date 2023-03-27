@@ -35,11 +35,11 @@ export default function EditorProvider({ children }: { children: ReactNode; }) {
   const [previousNote, setPreviousNote] = useState<Note>();
   const [content, setContent] = useState<string>("");
 
-  let updatedNote: Note;
-
   // Handle setting a new active note.
   const setNote = async (newNote: Note) => {
     // Check for content updates since last render.
+    let updatedNote: Note;
+
     if (note?.note_id) {
       let { data }: PostgrestSingleResponse<Note> = await supabase
         .from("notes_v2")
