@@ -1,6 +1,8 @@
 import Logo from "../public/logo.svg";
 import Image from "next/image";
-import HeroButtons from "../components/HeroButtons";
+import dynamic from "next/dynamic";
+
+const HeroButtons = dynamic(() => import("../components/HeroButtons"));
 
 export default function Home() {
   return (
