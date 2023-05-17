@@ -86,12 +86,16 @@
 .markdown-body ul {
   padding-left: 2em;
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   list-style-type: disc;
+  box-sizing: border-box;
+  line-height: 0.8;
 }
 
 .markdown-body li {
   display: list-item;
+  margin: 0;
+  padding: 0;
   text-align: -webkit-match-parent;
 }
 
